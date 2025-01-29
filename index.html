@@ -26,418 +26,34 @@
             background: #080B0E;
             color: #fff;
             min-height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Main Container */
-        .neo-container {
-            position: fixed;
-            inset: 0;
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 24px;
-            padding: 24px;
-        }
-
-        /* Main Content Area */
-        .main-content {
-            padding: 24px;
-            height: calc(100vh - 48px);
-            overflow-y: auto;
-        }
-
-        /* Search Container Styles */
-        .search-container {
-            background: var(--neo-surface);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            border: 1px solid var(--neo-glass);
-            padding: 32px;
-            margin-bottom: 24px;
-        }
-
-        .ai-status {
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--neo-surface);
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 255, 209, 0.2);
+            text-align: center;
+        }
+
+        h1 {
             color: var(--neo-primary);
+            font-size: 24px;
             margin-bottom: 16px;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--neo-primary);
-            animation: pulse 2s infinite;
-        }
-
-        /* Header Styles */
-        .header-group {
-            margin-bottom: 32px;
-        }
-
-        .header-group h1 {
-            font-size: 32px;
-            color: var(--neo-primary);
-            margin-bottom: 8px;
-        }
-
-        .ai-subtitle {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 16px;
-        }
-
-        /* Input Styles */
-        .search-inputs {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
         }
 
         .input-wrapper {
             position: relative;
+            margin-bottom: 16px;
         }
 
         .input-wrapper input {
             width: 100%;
-            height: 44px;
-            padding: 0 44px 0 16px;
-            background: rgba(0, 255, 209, 0.05);
-            border: 1px solid rgba(0, 255, 209, 0.2);
-            border-radius: 12px;
-            color: #fff;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .input-wrapper input:focus {
-            outline: none;
-            border-color: var(--neo-primary);
-            background: rgba(0, 255, 209, 0.1);
-        }
-
-        .clear-input {
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 44px;
-            height: 44px;
-            border: none;
-            background: none;
-            color: var(--neo-primary);
-            font-size: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Button Styles */
-        .button-group {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .primary-button,
-        .cancel-button {
-            height: 44px;
-            padding: 0 24px;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .primary-button {
-            background: var(--neo-primary);
-            color: var(--neo-dark);
-            border: none;
-        }
-
-        .cancel-button {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
-            display: none;
-        }
-
-        /* AI Steps Styles */
-        .ai-steps {
-            margin-top: 24px;
-        }
-
-        .step {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-            opacity: 0.5;
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .step.active {
-            opacity: 1;
-            color: #fff;
-        }
-
-        .loading-indicator {
-            width: 16px;
-            height: 16px;
-            border: 2px solid var(--neo-primary);
-            border-radius: 50%;
-            border-right-color: transparent;
-            animation: spin 1s linear infinite;
-        }
-
-        .progress-bar {
-            height: 2px;
-            background: var(--neo-primary);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        /* File Section Styles */
-        .file-section {
-            margin-top: 24px;
-            display: flex;
-            gap: 16px;
-            align-items: center;
-        }
-
-        .file-input-container {
-            position: relative;
-        }
-
-        .file-input-container input[type="file"] {
-            position: absolute;
-            width: 0;
-            height: 0;
-            opacity: 0;
-        }
-
-        .file-label {
-            display: inline-flex;
-            height: 44px;
-            padding: 0 24px;
-            background: rgba(0, 255, 209, 0.1);
-            border: 1px solid rgba(0, 255, 209, 0.3);
-            border-radius: 12px;
-            color: var(--neo-primary);
-            font-size: 16px;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        /* Animations */
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.5; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* High Resolution Support */
-        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-            .search-container {
-                border-width: 0.5px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="neo-container">
-        <main class="main-content">
-            <div class="search-container">
-                <div class="ai-status">
-                    <div class="status-dot"></div>
-                    AI Sales Assistant Active
-                </div>
-                
-                <div class="header-group">
-                    <h1>Market Intelligence</h1>
-                    <div class="ai-subtitle">Powered by Advanced Data Analysis</div>
-                </div>
-
-                <div class="input-group">
-                    <form id="scrapeForm" onsubmit="handleSubmit(event)">
-                        <div class="search-inputs">
-                            <div class="input-wrapper">
-                                <input type="text" 
-                                       id="search" 
-                                       placeholder="Business Type" 
-                                       required>
-                                <button type="button" class="clear-input">×</button>
-                            </div>
-
-                            <div class="input-wrapper">
-                                <input type="text" 
-                                       id="location" 
-                                       placeholder="Location" 
-                                       required>
-                                <button type="button" class="clear-input">×</button>
-                            </div>
-                        </div>
-
-                        <div class="button-group">
-                            <button type="submit" class="primary-button">
-                                Generate Market Report
-                            </button>
-                            <button type="button" 
-                                    class="cancel-button" 
-                                    onclick="cancelOperation()">
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </main>
-    </div>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neural Agent Interface</title>
-    <style>
-        :root {
-            --neo-primary: #00FFD1;
-            --neo-secondary: #00CCBB;
-            --neo-accent: rgba(0, 255, 209, 0.15);
-            --neo-surface: rgba(8, 11, 14, 0.95);
-            --neo-glass: rgba(255, 255, 255, 0.05);
-            --neo-glow: rgba(0, 255, 209, 0.2);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        body {
-            background: #080B0E;
-            color: #fff;
-            min-height: 100vh;
-            overflow: hidden;
-            display: flex;
-        }
-
-        /* Main Container */
-        .neo-container {
-            position: fixed;
-            inset: 0;
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 24px;
-            padding: 24px;
-        }
-
-        /* Right Panel - Agent Interface */
-        .agent-interface {
-            background: var(--neo-surface);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px;
-            border-left: 1px solid var(--neo-glass);
-            padding: 44px 24px;
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - 48px);
-        }
-
-        /* Agent Face Container */
-        .agent-core {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 24px;
-            position: relative;
-        }
-
-        .agent-face {
-            width: 320px;
-            height: 320px;
-            border-radius: 50%;
-            position: relative;
-            background: rgba(0, 255, 209, 0.05);
-            overflow: hidden;
-            margin-top: 44px;
-        }
-
-        .face-overlay {
-            position: absolute;
-            inset: 0;
-            border: 1px solid rgba(0, 255, 209, 0.3);
-            border-radius: 50%;
-            box-shadow: 0 0 40px var(--neo-glow);
-        }
-
-        .scanning-line {
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            background: var(--neo-primary);
-            opacity: 0.5;
-            animation: scan 2s linear infinite;
-        }
-
-        /* Voice Control */
-        .voice-control {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            margin-top: 24px;
-        }
-
-        .agent-voice-button {
-            position: relative;
-            width: 200px;
-            height: 44px;
-            padding: 0 20px;
-            background: rgba(0, 255, 209, 0.1);
-            border: 1px solid rgba(0, 255, 209, 0.3);
-            border-radius: 22px;
-            color: var(--neo-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .pulse-ring {
-            position: absolute;
-            inset: -1px;
-            border: 1px solid rgba(0, 255, 209, 0.3);
-            border-radius: 22px;
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-
-        /* Chat Input */
-        .chat-input-wrapper {
-            width: 100%;
-            padding: 0 24px;
-            margin-top: 16px;
-            display: flex;
-            gap: 8px;
-        }
-
-        .chat-input {
-            flex: 1;
             height: 44px;
             padding: 0 16px;
             background: rgba(0, 255, 209, 0.05);
@@ -447,312 +63,96 @@
             font-size: 16px;
         }
 
-        .send-button {
-            width: 44px;
-            height: 44px;
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: var(--neo-primary);
             background: rgba(0, 255, 209, 0.1);
-            border: 1px solid rgba(0, 255, 209, 0.3);
+        }
+
+        .primary-button {
+            width: 100%;
+            height: 44px;
+            background: var(--neo-primary);
+            border: none;
             border-radius: 12px;
-            color: var(--neo-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            color: #080B0E;
+            font-size: 16px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        /* Animations */
-        @keyframes scan {
-            0% { top: -5%; }
-            100% { top: 105%; }
+        .primary-button:hover {
+            background: var(--neo-secondary);
         }
 
-        @keyframes pulse {
-            0% { 
-                transform: scale(1);
-                opacity: 0.5;
-            }
-            100% { 
-                transform: scale(1.1);
-                opacity: 0;
-            }
-        }
-
-        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-            .agent-face {
-                border-width: 0.5px;
-            }
+        .message {
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--neo-primary);
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div class="neo-container">
-        <main class="main-content">
-            <!-- Main content area -->
-        </main>
 
-        <div class="agent-interface">
-            <div class="agent-core">
-                <!-- Agent Face -->
-                <div class="agent-face">
-                    <canvas id="agentCanvas"></canvas>
-                    <div class="face-overlay"></div>
-                    <div class="scanning-line"></div>
-                </div>
+    <div class="container">
+        <h1>Market Intelligence</h1>
+        <p>Enter your details to generate a market report</p>
 
-                <!-- Voice Control -->
-                <div class="voice-control">
-                    <button class="agent-voice-button" aria-label="Speak with Agent">
-                        <div class="pulse-ring"></div>
-                        <div class="button-content">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3z" 
-                                      fill="currentColor"/>
-                                <path d="M17 12c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V22h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" 
-                                      fill="currentColor"/>
-                            </svg>
-                            <span>Speak with Agent</span>
-                        </div>
-                    </button>
-                </div>
-
-                <!-- Chat Input -->
-                <div class="chat-input-wrapper">
-                    <input type="text" 
-                           class="chat-input" 
-                           placeholder="Type your message..."
-                           aria-label="Message Input">
-                    <button class="send-button" aria-label="Send Message">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M2.5 10L17.5 10M17.5 10L10 2.5M17.5 10L10 17.5" 
-                                  stroke="currentColor" 
-                                  stroke-width="2" 
-                                  stroke-linecap="round"/>
-                        </svg>
-                    </button>
-                </div>
+        <form id="scrapeForm">
+            <div class="input-wrapper">
+                <input type="text" id="search" name="search" placeholder="Business Type" required>
             </div>
-        </div>
+
+            <div class="input-wrapper">
+                <input type="text" id="location" name="location" placeholder="Location" required>
+            </div>
+
+            <button type="submit" class="primary-button">Generate Market Report</button>
+        </form>
+
+        <p id="responseMessage" class="message">Sending...</p>
     </div>
 
     <script>
-        // Agent Face Animation
-        const canvas = document.getElementById('agentCanvas');
-        const ctx = canvas.getContext('2d');
-
-        function setupCanvas() {
-            const dpr = window.devicePixelRatio || 1;
-            const rect = canvas.parentNode.getBoundingClientRect();
+        document.getElementById("scrapeForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
             
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
-            canvas.style.width = `${rect.width}px`;
-            canvas.style.height = `${rect.height}px`;
-            
-            ctx.scale(dpr, dpr);
-        }
+            const searchValue = document.getElementById("search").value;
+            const locationValue = document.getElementById("location").value;
+            const responseMessage = document.getElementById("responseMessage");
 
-        class AgentFace {
-            constructor() {
-                this.points = [];
-                this.init();
-            }
+            responseMessage.style.display = "block";
+            responseMessage.textContent = "Sending...";
 
-            init() {
-                const centerX = canvas.width / 2;
-                const centerY = canvas.height / 2;
-                const radius = canvas.width / 3;
+            const webhookUrl = "https://hook.eu2.make.com/l6tcudjx6bsqdyy6adoyj5kosf9r8f4o";
+            const formData = {
+                search: searchValue,
+                location: locationValue
+            };
 
-                for(let i = 0; i < 200; i++) {
-                    this.points.push({
-                        x: centerX + (Math.random() - 0.5) * radius,
-                        y: centerY + (Math.random() - 0.5) * radius,
-                        vx: (Math.random() - 0.5) * 0.5,
-                        vy: (Math.random() - 0.5) * 0.5
-                    });
-                }
-            }
-
-            draw() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.strokeStyle = '#00FFD1';
-                ctx.lineWidth = 1;
-
-                this.points.forEach(point => {
-                    point.x += point.vx;
-                    point.y += point.vy;
-
-                    const dx = point.x - canvas.width/2;
-                    const dy = point.y - canvas.height/2;
-                    const distance = Math.sqrt(dx*dx + dy*dy);
-                    
-                    if(distance > canvas.width/3) {
-                        point.vx *= -1;
-                        point.vy *= -1;
-                    }
-
-                    this.points.forEach(otherPoint => {
-                        const d = Math.hypot(point.x - otherPoint.x, point.y - otherPoint.y);
-                        if(d < 50) {
-                            ctx.beginPath();
-                            ctx.moveTo(point.x, point.y);
-                            ctx.lineTo(otherPoint.x, otherPoint.y);
-                            ctx.globalAlpha = 1 - (d/50);
-                            ctx.stroke();
-                        }
-                    });
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(formData)
                 });
-            }
 
-            animate() {
-                this.draw();
-                requestAnimationFrame(() => this.animate());
-            }
-        }
-
-        // Initialize
-        setupCanvas();
-        const agentFace = new AgentFace();
-        agentFace.animate();
-
-        // Voice Recognition
-        const voiceButton = document.querySelector('.agent-voice-button');
-        voiceButton.addEventListener('click', () => {
-            if ('webkitSpeechRecognition' in window) {
-                const recognition = new webkitSpeechRecognition();
-                recognition.continuous = false;
-                recognition.interimResults = false;
-
-                recognition.onstart = () => {
-                    voiceButton.style.background = 'rgba(0, 255, 209, 0.3)';
-                };
-
-                recognition.onresult = (event) => {
-                    const transcript = event.results[0][0].transcript;
-                    document.querySelector('.chat-input').value = transcript;
-                };
-
-                recognition.onend = () => {
-                    voiceButton.style.background = '';
-                };
-
-                recognition.start();
+                if (response.ok) {
+                    responseMessage.textContent = "Market report request sent successfully!";
+                    responseMessage.style.color = "limegreen";
+                } else {
+                    responseMessage.textContent = "Error sending request. Try again.";
+                    responseMessage.style.color = "red";
+                }
+            } catch (error) {
+                responseMessage.textContent = "Network error. Please check your connection.";
+                responseMessage.style.color = "red";
             }
         });
-
-        // Handle window resize
-        window.addEventListener('resize', setupCanvas);
     </script>
+
 </body>
 </html>
-<!-- Update the search container styling -->
-<style>
-    /* Update Search Container to match Agent Interface */
-    .search-container {
-        background: var(--neo-surface);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-radius: 24px;
-        border-left: 1px solid var(--neo-glass);
-        padding: 44px 24px;
-        display: flex;
-        flex-direction: column;
-        height: calc(100vh - 48px);
-    }
-
-    /* Update Input Styling */
-    .input-wrapper input {
-        background: rgba(0, 255, 209, 0.05);
-        border: 1px solid rgba(0, 255, 209, 0.2);
-        border-radius: 12px;
-        color: #fff;
-        font-size: 16px;
-        height: 44px;
-        padding: 0 44px 0 16px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .input-wrapper input:focus {
-        border-color: var(--neo-primary);
-        background: rgba(0, 255, 209, 0.1);
-        box-shadow: 0 0 20px var(--neo-glow);
-    }
-
-    /* Update Button Styling */
-    .primary-button {
-        background: rgba(0, 255, 209, 0.1);
-        border: 1px solid rgba(0, 255, 209, 0.3);
-        color: var(--neo-primary);
-        border-radius: 22px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .primary-button:hover {
-        background: rgba(0, 255, 209, 0.2);
-        transform: translateY(-1px);
-        box-shadow: 0 5px 15px rgba(0, 255, 209, 0.2);
-    }
-
-    /* Update AI Steps */
-    .ai-steps {
-        margin-top: 24px;
-        border-top: 1px solid rgba(0, 255, 209, 0.1);
-        padding-top: 24px;
-    }
-
-    .step {
-        background: rgba(0, 255, 209, 0.05);
-        border: 1px solid rgba(0, 255, 209, 0.1);
-        border-radius: 12px;
-        padding: 16px;
-        margin-bottom: 12px;
-        transition: all 0.3s ease;
-    }
-
-    .step.active {
-        background: rgba(0, 255, 209, 0.1);
-        border-color: rgba(0, 255, 209, 0.3);
-        box-shadow: 0 0 20px var(--neo-glow);
-    }
-
-    /* Update File Section */
-    .file-section {
-        margin-top: auto;
-        padding-top: 24px;
-        border-top: 1px solid rgba(0, 255, 209, 0.1);
-    }
-
-    .file-label {
-        background: rgba(0, 255, 209, 0.1);
-        border: 1px solid rgba(0, 255, 209, 0.3);
-        border-radius: 22px;
-        height: 44px;
-        padding: 0 24px;
-        color: var(--neo-primary);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .file-label:hover {
-        background: rgba(0, 255, 209, 0.2);
-        transform: translateY(-1px);
-    }
-
-    /* Add Neural Grid Background */
-    .neural-grid {
-        position: absolute;
-        inset: 0;
-        background-image: 
-            linear-gradient(to right, rgba(0, 255, 209, 0.1) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(0, 255, 209, 0.1) 1px, transparent 1px);
-        background-size: 30px 30px;
-        transform: perspective(1000px) rotateX(60deg);
-        opacity: 0.2;
-        pointer-events: none;
-    }
-</style>
-
-<!-- Add Neural Grid to container -->
-<div class="search-container">
-    <div class="neural-grid"></div>
-    <!-- Existing content -->
-</div>
