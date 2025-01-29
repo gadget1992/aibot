@@ -156,3 +156,51 @@
 
 </body>
 </html>
+<style>
+    .input-field {
+        width: 100%;
+        height: 44px;
+        padding: 0 16px;
+        background: var(--neo-accent);
+        border: 1px solid var(--neo-glow);
+        border-radius: 12px;
+        color: #fff;
+        font-size: 16px;
+        margin-bottom: 16px;
+    }
+
+    .input-field:focus {
+        outline: none;
+        border-color: var(--neo-primary);
+        background: rgba(0, 255, 209, 0.1);
+    }
+
+    .input-label {
+        display: block;
+        text-align: left;
+        margin-bottom: 8px;
+        color: var(--neo-primary);
+        font-size: 14px;
+    }
+</style>
+
+<div class="container">
+    <h1>Market Intelligence</h1>
+    <p>Enter your details to generate a market report</p>
+
+    <form id="scrapeForm">
+        <div class="input-wrapper">
+            <label for="businessType" class="input-label">Business Type</label>
+            <input type="text" id="businessType" name="businessType" class="input-field" placeholder="e.g. Restaurant, Retail Store" required>
+        </div>
+
+        <div class="input-wrapper">
+            <label for="location" class="input-label">Location</label>
+            <input type="text" id="location" name="location" class="input-field" placeholder="e.g. New York, NY" required>
+        </div>
+
+        <button type="submit" class="primary-button">Generate Market Report</button>
+    </form>
+
+    <p id="responseMessage" class="message">Sending...</p>
+</div>
