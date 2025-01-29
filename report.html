@@ -1,0 +1,2016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Management - MarketAI</title>
+    <style>
+        /* Keep the core variables and base styles from index.html */
+        :root {
+            --ai-primary: #00ffbf;
+            --ai-secondary: #0dccab;
+            --ai-accent: rgba(0, 255, 191, 0.15);
+            --dark-surface: rgba(13, 16, 20, 0.95);
+            --terminal-green: #00ff9d;
+            --glow: rgba(0, 255, 191, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: #0a0a0c;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 24px;
+            background: var(--dark-surface);
+            backdrop-filter: blur(12px);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Main Content */
+        .report-container {
+            max-width: 1400px;
+            margin: 100px auto 40px;
+            padding: 0 24px;
+        }
+
+        /* Data Table Styles */
+        .data-table {
+            width: 100%;
+            background: var(--dark-surface);
+            border-radius: 16px;
+            border: 1px solid rgba(0, 255, 191, 0.1);
+            overflow: hidden;
+            margin: 24px 0;
+        }
+
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: rgba(0, 255, 191, 0.1);
+            padding: 16px;
+            text-align: left;
+            font-weight: 500;
+            color: var(--ai-primary);
+        }
+
+        .data-table td {
+            padding: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-table tr:hover {
+            background: rgba(0, 255, 191, 0.05);
+        }
+
+        /* Call Status Indicators */
+        .call-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+
+        .status-pending {
+            background: rgba(255, 171, 0, 0.1);
+            color: #ffab00;
+        }
+
+        .status-contacted {
+            background: rgba(0, 255, 191, 0.1);
+            color: var(--ai-primary);
+        }
+
+        .status-no-answer {
+            background: rgba(255, 59, 48, 0.1);
+            color: #ff3b30;
+        }
+
+        /* Notes Modal */
+        .notes-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 500px;
+            background: var(--dark-surface);
+            border-radius: 16px;
+            padding: 24px;
+            z-index: 200;
+            display: none;
+        }
+
+        .notes-textarea {
+            width: 100%;
+            height: 150px;
+            background: rgba(13, 16, 20, 0.8);
+            border: 1px solid rgba(0, 255, 191, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            color: #fff;
+            margin: 16px 0;
+            resize: vertical;
+        }
+
+        /* Action Buttons */
+        .action-button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .call-button {
+            background: var(--ai-primary);
+            color: #000;
+        }
+
+        .notes-button {
+            background: rgba(0, 255, 191, 0.1);
+            color: var(--ai-primary);
+        }
+
+        .export-button {
+            background: linear-gradient(95deg, var(--ai-primary), var(--ai-secondary));
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 12px;
+        }
+
+        /* Search and Filter */
+        .controls {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            flex: 1;
+            height: 44px;
+            background: rgba(13, 16, 20, 0.8);
+            border: 1px solid rgba(0, 255, 191, 0.2);
+            border-radius: 8px;
+            padding: 0 16px;
+            color: #fff;
+        }
+
+        .filter-select {
+            height: 44px;
+            background: rgba(13, 16, 20, 0.8);
+            border: 1px solid rgba(0, 255, 191, 0.2);
+            border-radius: 8px;
+            padding: 0 16px;
+            color: #fff;
+            min-width: 150px;
+        }
+
+        .company-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .company-info small {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+        }
+
+        .phone-link {
+            color: var(--ai-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .call-icon {
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .phone-link:hover .call-icon {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .priority-select {
+            background: rgba(13, 16, 20, 0.8);
+            border: 1px solid rgba(0, 255, 191, 0.2);
+            border-radius: 8px;
+            padding: 8px;
+            color: #fff;
+            width: 140px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        #noteCompanyName {
+            color: var(--ai-primary);
+            margin-bottom: 16px;
+            font-size: 18px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-modal:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .status-selector {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-selector label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .status-selector select {
+            flex: 1;
+            height: 36px;
+            background: rgba(13, 16, 20, 0.8);
+            border: 1px solid rgba(0, 255, 191, 0.2);
+            border-radius: 8px;
+            padding: 0 12px;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        /* Status Colors */
+        .status-contacted { background: rgba(52, 199, 89, 0.1); color: #34c759; }
+        .status-callback { background: rgba(255, 149, 0, 0.1); color: #ff9500; }
+        .status-meeting { background: rgba(0, 122, 255, 0.1); color: #007aff; }
+        .status-declined { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
+        .status-interested { background: rgba(88, 86, 214, 0.1); color: #5856d6; }
+        .status-not-interested { background: rgba(255, 69, 58, 0.1); color: #ff453a; }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .contact-input {
+            background: rgba(13, 16, 20, 0.8);
+            border: 1px solid rgba(0, 255, 191, 0.2);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: #fff;
+            width: 100%;
+        }
+
+        .contact-input:focus {
+            border-color: var(--ai-primary);
+            outline: none;
+        }
+
+        .last-contact {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        .date-input {
+            background: rgba(13, 16, 20, 0.8);
+            border: 1px solid rgba(0, 255, 191, 0.2);
+            border-radius: 4px;
+            padding: 4px 8px;
+            color: #fff;
+            font-size: 12px;
+        }
+
+        .date-input::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+        }
+
+        .search-filters {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .date-filter {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Activity indicator styles */
+        .activity-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .has-notes {
+            width: 8px;
+            height: 8px;
+            background: var(--ai-primary);
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .last-activity {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Enhanced table styles */
+        .data-table {
+            overflow-x: auto;
+        }
+
+        .data-table th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .sort-button {
+            background: none;
+            border: none;
+            color: var(--ai-primary);
+            cursor: pointer;
+            padding: 0 4px;
+        }
+
+        .contact-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .email-input-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .email-input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .verify-email-btn {
+            padding: 4px 12px;
+            height: auto;
+            font-size: 12px;
+            background: var(--ai-primary);
+            color: #000;
+            border-radius: 4px;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .verify-email-btn:not(:disabled):hover {
+            opacity: 1;
+        }
+
+        .verify-email-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .email-status {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .email-status.verified {
+            color: var(--ai-primary);
+        }
+
+        .contact-input.email-input {
+            padding-right: 32px;
+        }
+
+        .contact-input.email-input:invalid {
+            border-color: rgba(255, 59, 48, 0.3);
+        }
+
+        /* AI Support Modal Styles */
+        .ai-support-modal {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 24px;
+            width: 480px;
+            max-height: 80vh;
+            background: var(--dark-surface);
+            border: 1px solid rgba(0, 255, 191, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            overflow: hidden;
+        }
+
+        .ai-support-modal.active {
+            display: block;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .help-button {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: auto !important;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(95deg, var(--ai-primary), var(--ai-secondary));
+            z-index: 100;
+            height: 44px;
+            border-radius: 8px;
+            color: #000;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        .help-button::before {
+            content: '🤖';
+            font-size: 20px;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background: var(--dark-surface);
+            padding: 40px 24px;
+            margin-top: auto;
+            border-top: 1px solid rgba(0, 255, 191, 0.1);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--ai-primary);
+        }
+
+        .footer-text {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+        }
+
+        /* Ensure proper layout with footer */
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .report-container {
+            flex: 1;
+            margin-bottom: 40px;
+        }
+
+        /* Chat Styles */
+        .ai-chat-container {
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 12px;
+        }
+
+        .ai-message {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            max-width: 90%;
+            word-wrap: break-word;
+        }
+
+        .ai-message.user {
+            background: rgba(0, 255, 191, 0.1);
+            margin-left: auto;
+        }
+
+        .ai-message.assistant {
+            background: rgba(13, 16, 20, 0.8);
+        }
+
+        .ai-input {
+            display: flex;
+            gap: 12px;
+            padding: 0 0 8px 0;
+        }
+
+        .ai-input input {
+            flex: 1;
+            height: 48px;
+            background: rgba(13, 16, 20, 0.8);
+            border: 1px solid rgba(0, 255, 191, 0.2);
+            border-radius: 8px;
+            color: #fff;
+            padding: 0 16px;
+            font-size: 15px;
+        }
+
+        .ai-input button {
+            width: auto;
+            min-width: 80px;
+            padding: 0 20px;
+        }
+
+        .contact-history {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .last-contact-info,
+        .next-contact-info,
+        .contact-count {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .label {
+            color: var(--text-secondary);
+            min-width: 100px;
+        }
+
+        .date {
+            color: var(--ai-primary);
+        }
+
+        .date-input {
+            background: rgba(13, 16, 20, 0.8);
+            border: 1px solid rgba(0, 255, 191, 0.2);
+            border-radius: 4px;
+            padding: 4px 8px;
+            color: #fff;
+            font-size: 12px;
+            width: 160px;
+        }
+
+        .date-input::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+        }
+
+        .count {
+            background: rgba(0, 255, 191, 0.1);
+            color: var(--ai-primary);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .save-button, .upgrade-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .save-button {
+            background: rgba(0, 255, 191, 0.1);
+            color: var(--ai-primary);
+            border: 1px solid rgba(0, 255, 191, 0.2);
+        }
+
+        .upgrade-button {
+            background: linear-gradient(95deg, #FFD700, #FFA500);
+            color: #000;
+            border: none;
+        }
+
+        .save-button:hover {
+            background: rgba(0, 255, 191, 0.15);
+        }
+
+        .upgrade-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        }
+
+        .icon {
+            font-size: 16px;
+        }
+
+        /* Upgrade Modal Styles */
+        .upgrade-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            opacity: 0;
+            width: 90%;
+            max-width: 800px;
+            background: var(--dark-surface);
+            border: 1px solid rgba(0, 255, 191, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            z-index: 201;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .upgrade-modal.active {
+            visibility: visible;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .auth-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            opacity: 0;
+            width: 90%;
+            max-width: 480px;
+            background: var(--dark-surface);
+            border: 1px solid rgba(0, 255, 191, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            z-index: 201;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 0 0 1px rgba(0, 255, 191, 0.1),
+                0 4px 6px rgba(0, 0, 0, 0.1),
+                0 10px 20px rgba(0, 0, 0, 0.2),
+                0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .auth-modal.active {
+            visibility: visible;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .auth-content h2 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            background: linear-gradient(to right, var(--ai-primary), var(--ai-secondary));
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .auth-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 32px;
+        }
+
+        .auth-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .auth-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            height: 48px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .auth-button.google {
+            background: #fff;
+            color: #000;
+        }
+
+        .auth-button.apple {
+            background: #000;
+            color: #fff;
+        }
+
+        .auth-button.x {
+            background: #000;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Update the pricing modal styles to match */
+        .pricing-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            opacity: 0;
+            width: 90%;
+            max-width: 1000px;
+            background: var(--dark-surface);
+            border: 1px solid rgba(0, 255, 191, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            z-index: 201;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .pricing-modal.active {
+            visibility: visible;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .pricing-content h2 {
+            font-size: 32px;
+            margin-bottom: 12px;
+            background: linear-gradient(to right, var(--ai-primary), var(--ai-secondary));
+            -webkit-background-clip: text;
+            color: transparent;
+            text-align: center;
+        }
+
+        .pricing-subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 40px;
+        }
+
+        .pricing-cards {
+            display: flex;
+            gap: 20px;
+            margin: 32px 0;
+        }
+
+        .pricing-card {
+            flex: 1;
+            background: rgba(13, 16, 20, 0.5);
+            border: 1px solid rgba(0, 255, 191, 0.1);
+            border-radius: 16px;
+            padding: 32px;
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .pricing-card.popular {
+            border: 2px solid var(--ai-primary);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--ai-primary);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .tier-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--ai-primary);
+        }
+
+        .tier-price {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #fff;
+        }
+
+        .tier-price span {
+            font-size: 16px;
+            opacity: 0.7;
+        }
+
+        .tier-features {
+            margin-bottom: 24px;
+        }
+
+        .tier-feature {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .tier-feature::before {
+            content: '✓';
+            color: var(--ai-primary);
+        }
+
+        .tier-feature.disabled {
+            opacity: 0.5;
+        }
+
+        .tier-feature.disabled::before {
+            content: '×';
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .tier-button {
+            width: 100%;
+            height: 44px;
+            background: linear-gradient(95deg, var(--ai-primary), var(--ai-secondary));
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tier-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 191, 0.2);
+        }
+
+        .admin-button {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            width: auto !important;
+            padding: 0 24px;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 12px;
+            z-index: 100;
+        }
+
+        .admin-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .admin-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            background: var(--dark-surface);
+            border: 1px solid rgba(0, 255, 191, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            z-index: 201;
+            backdrop-filter: blur(20px);
+        }
+
+        .admin-modal.active {
+            display: block;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        .admin-modal input {
+            margin-bottom: 16px;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            border-radius: 8px;
+            background: var(--dark-surface);
+            border: 1px solid var(--ai-primary);
+            color: var(--ai-primary);
+            z-index: 1000;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translate(-50%, 100%);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+        }
+
+        /* Add data attributes to input fields */
+        .contact-input {
+            data-field: attr(data-field);
+        }
+
+        /* Add responsive styles */
+        @media (max-width: 768px) {
+            .ai-support-modal {
+                width: 90%;
+                left: 50%;
+                transform: translateX(-50%);
+                bottom: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <a href="file:///Users/joshuastone/Downloads/GoogleMaps%202/landing.html" class="logo" 
+           style="font-size: 24px;
+                  font-weight: 700;
+                  background: linear-gradient(to right, var(--ai-primary), var(--ai-secondary));
+                  -webkit-background-clip: text;
+                  color: transparent;
+                  text-decoration: none;">MarketAI</a>
+        <div class="nav-actions">
+            <button class="save-button" onclick="saveReport()">
+                <span class="icon">💾</span>
+                Save Report
+            </button>
+            <button class="upgrade-button" onclick="showUpgradeModal()">
+                <span class="icon">⭐</span>
+                Upgrade Plan
+            </button>
+            <button class="export-button" onclick="exportCSV()">Export Report</button>
+        </div>
+    </nav>
+
+    <div class="report-container">
+        <div class="controls">
+            <div class="search-filters">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search leads..." oninput="filterLeads()">
+                <div class="filter-group">
+                    <select class="filter-select" id="statusFilter" onchange="filterLeads()">
+                        <option value="all">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="callback">Call Back</option>
+                        <option value="meeting">Meeting</option>
+                        <option value="declined">Declined</option>
+                        <option value="no-answer">No Answer</option>
+                    </select>
+                    
+                    <select class="filter-select" id="priorityFilter" onchange="filterLeads()">
+                        <option value="all">All Priority</option>
+                        <option value="high">High Priority</option>
+                        <option value="medium">Medium Priority</option>
+                        <option value="low">Low Priority</option>
+                    </select>
+
+                    <div class="date-filter">
+                        <input type="date" class="date-input" id="dateFromFilter" onchange="filterLeads()" placeholder="From Date">
+                        <input type="date" class="date-input" id="dateToFilter" onchange="filterLeads()" placeholder="To Date">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Company Info</th>
+                        <th>Contact Details</th>
+                        <th>Location</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Contact History</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="leadsTableBody">
+                    <!-- Data will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Notes Modal -->
+    <div class="notes-modal" id="notesModal">
+        <button class="close-modal" onclick="closeNotesModal()">×</button>
+        <h3 id="noteCompanyName"></h3>
+        
+        <div class="status-selector">
+            <label>Status:</label>
+            <select id="leadStatus" onchange="updateLeadStatus(currentLeadId, this.value)">
+                <option value="pending">Pending</option>
+                <option value="contacted">Contacted</option>
+                <option value="callback">Call Back</option>
+                <option value="meeting">Meeting Scheduled</option>
+                <option value="declined">Declined</option>
+                <option value="no-answer">No Answer</option>
+                <option value="interested">Interested</option>
+                <option value="not-interested">Not Interested</option>
+            </select>
+        </div>
+
+        <textarea class="notes-textarea" placeholder="Enter your notes about this contact..."></textarea>
+        <div class="modal-buttons">
+            <button class="action-button call-button" onclick="saveNotes()">Save Notes</button>
+            <button class="action-button notes-button" onclick="closeNotesModal()">Cancel</button>
+        </div>
+    </div>
+
+    <button class="help-button" onclick="toggleAISupport()">Initiate AI Support</button>
+
+    <!-- AI Support Modal -->
+    <div class="ai-support-modal" id="aiSupportModal">
+        <div class="ai-chat-container" id="aiChat">
+            <div class="ai-message assistant">
+                Hello! I'm your AI assistant. I can help you with:
+                - Lead management strategies
+                - Contact prioritization
+                - Market analysis insights
+                What would you like to know?
+            </div>
+        </div>
+        <div class="ai-input">
+            <input type="text" id="aiQuestion" 
+                   placeholder="Ask about your leads..."
+                   onkeypress="handleAIInput(event)">
+            <button onclick="sendAIQuestion()">Send</button>
+        </div>
+    </div>
+
+    <!-- Add Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="file:///Users/joshuastone/Downloads/GoogleMaps%202/privacy-policy.html">Privacy Policy</a>
+                <a href="file:///Users/joshuastone/Downloads/GoogleMaps%202/terms.html">Terms of Service</a>
+                <a href="file:///Users/joshuastone/Downloads/GoogleMaps%202/cookie-policy.html">Cookie Policy</a>
+                <a href="file:///Users/joshuastone/Downloads/GoogleMaps%202/data-processing.html">Data Processing</a>
+                <a href="file:///Users/joshuastone/Downloads/GoogleMaps%202/sitemap.html">Sitemap</a>
+                <a href="#" onclick="manageCookies()">Cookie Settings</a>
+            </div>
+            <p class="footer-text">© 2024 MarketAI. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Add Upgrade Modal -->
+    <div class="upgrade-modal" id="upgradeModal">
+        <button class="close-modal" onclick="closeUpgradeModal()">×</button>
+        <div class="pricing-content">
+            <h2>Upgrade Your Plan</h2>
+            <p class="pricing-subtitle">Get access to more powerful features</p>
+            
+            <div class="pricing-cards">
+                <!-- Pro Tier -->
+                <div class="pricing-card popular">
+                    <div class="popular-badge">MOST POPULAR</div>
+                    <div class="tier-name">Pro</div>
+                    <div class="tier-price">$19.99 <span>/month</span></div>
+                    <div class="tier-features">
+                        <div class="tier-feature">Market Search</div>
+                        <div class="tier-feature">Dataset Import</div>
+                        <div class="tier-feature disabled">AI Support</div>
+                        <div class="tier-feature">Email Support</div>
+                    </div>
+                    <button onclick="upgradeToPro()" class="tier-button">
+                        Upgrade to Pro
+                    </button>
+                </div>
+
+                <!-- Enterprise Tier -->
+                <div class="pricing-card">
+                    <div class="tier-name">Enterprise</div>
+                    <div class="tier-price">$29.99 <span>/month</span></div>
+                    <div class="tier-features">
+                        <div class="tier-feature">Market Search</div>
+                        <div class="tier-feature">Dataset Import</div>
+                        <div class="tier-feature">AI Support</div>
+                        <div class="tier-feature">Priority Support</div>
+                    </div>
+                    <button onclick="upgradeToEnterprise()" class="tier-button">
+                        Upgrade to Enterprise
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update the auth modal HTML -->
+    <div class="auth-modal modal-base" id="authModal">
+        <button class="close-modal" onclick="closeAuth()">×</button>
+        <div class="auth-content">
+            <h2>Welcome to MarketAI</h2>
+            <p class="auth-subtitle" id="authSubtitle">Choose how you'd like to continue</p>
+            
+            <div class="auth-buttons">
+                <button class="auth-button google" onclick="signInWithGoogle()">
+                    <img src="https://www.google.com/favicon.ico" alt="Google">
+                    Continue with Google
+                </button>
+                
+                <button class="auth-button apple" onclick="signInWithApple()">
+                    <svg height="20" viewBox="0 0 384 512" width="20">
+                        <path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
+                    </svg>
+                    Continue with Apple
+                </button>
+                
+                <button class="auth-button x" onclick="signInWithX()">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                    Continue with X
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add this button near the bottom of the body, before the footer -->
+    <button class="admin-button" onclick="showAdminLogin()">Admin</button>
+
+    <!-- Add the admin modal -->
+    <div class="admin-modal modal-base" id="adminModal">
+        <div class="paywall-title">Admin Access</div>
+        <input type="password" id="adminPassword" 
+               placeholder="Enter admin password"
+               onkeypress="handleAdminInput(event)">
+        <button onclick="verifyAdmin()">Login</button>
+    </div>
+
+    <script>
+        // Demo data for leads
+        const demoLeads = [
+            {
+                id: 1,
+                companyName: "Tech Solutions Ltd",
+                phoneNumber: "+44 20 7123 4567",
+                address: "123 Innovation Way, London, EC1A 1BB",
+                status: "pending",
+                lastContact: "",
+                notes: "",
+                priority: "high",
+                website: "www.techsolutions.com",
+                pointOfContact: "",
+                contactEmail: "",
+                contactRole: "",
+                lastContactDate: "",
+                nextFollowUp: "",
+                contactAttempts: 0,
+                contactHistory: []
+            },
+            {
+                id: 2,
+                companyName: "Digital Dynamics",
+                phoneNumber: "+44 20 7234 5678",
+                address: "456 Digital Avenue, Manchester, M1 1AB",
+                status: "contacted",
+                lastContact: "2024-01-15",
+                notes: "Interested in enterprise solution. Follow up next week.",
+                priority: "medium",
+                website: "www.digitaldynamics.co.uk",
+                pointOfContact: "John Doe",
+                contactEmail: "john.doe@digitaldynamics.co.uk",
+                contactRole: "Sales Manager",
+                lastContactDate: "2024-01-10",
+                nextFollowUp: "2024-01-20",
+                contactAttempts: 2,
+                contactHistory: [
+                    {
+                        date: "2024-01-15T10:30:00",
+                        type: "call",
+                        notes: "Initial contact made"
+                    },
+                    {
+                        date: "2024-01-15T14:20:00",
+                        type: "email",
+                        notes: "Sent follow-up email"
+                    }
+                ]
+            },
+            {
+                id: 3,
+                companyName: "Cloud Systems UK",
+                phoneNumber: "+44 20 7345 6789",
+                address: "789 Cloud Street, Birmingham, B1 1AA",
+                status: "no-answer",
+                lastContact: "2024-01-10",
+                notes: "Left voicemail, try again in afternoon.",
+                priority: "low",
+                website: "www.cloudsystems.co.uk",
+                pointOfContact: "Jane Smith",
+                contactEmail: "jane.smith@cloudsystems.co.uk",
+                contactRole: "Customer Success Manager",
+                lastContactDate: "2024-01-10",
+                nextFollowUp: "2024-01-20",
+                contactAttempts: 1,
+                contactHistory: [
+                    {
+                        date: "2024-01-10T10:30:00",
+                        type: "call",
+                        notes: "Initial contact made"
+                    }
+                ]
+            }
+        ];
+
+        // Modified table rendering to include priority and enhanced features
+        function renderLeadsTable() {
+            const tbody = document.getElementById('leadsTableBody');
+            tbody.innerHTML = demoLeads.map(lead => `
+                <tr>
+                    <td>
+                        <div class="company-info">
+                            <strong>${lead.companyName}</strong>
+                            <div class="activity-indicator">
+                                ${lead.notes ? '<span class="has-notes" title="Has notes"></span>' : ''}
+                                ${lead.lastUpdated ? `<span class="last-activity">Updated: ${formatDate(lead.lastUpdated)}</span>` : ''}
+                            </div>
+                            <div class="contact-info">
+                                <input type="text" 
+                                       class="contact-input" 
+                                       placeholder="Point of Contact"
+                                       value="${lead.pointOfContact}"
+                                       onchange="updateContact(${lead.id}, 'pointOfContact', this.value)">
+                                <input type="text" 
+                                       class="contact-input" 
+                                       placeholder="Contact Email"
+                                       value="${lead.contactEmail}"
+                                       onchange="updateContact(${lead.id}, 'contactEmail', this.value)">
+                                <input type="text" 
+                                       class="contact-input" 
+                                       placeholder="Role/Position"
+                                       value="${lead.contactRole}"
+                                       onchange="updateContact(${lead.id}, 'contactRole', this.value)">
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="contact-details">
+                            <a href="tel:${lead.phoneNumber}" class="phone-link" onclick="updateCallStatus(${lead.id})">
+                                ${lead.phoneNumber}
+                                <span class="call-icon">📞</span>
+                            </a>
+                            <div class="email-input-container">
+                                <input type="email" 
+                                       class="contact-input email-input" 
+                                       placeholder="Enter prospect email"
+                                       value="${lead.email || ''}"
+                                       onchange="updateContact(${lead.id}, 'email', this.value)">
+                                <button class="verify-email-btn" onclick="verifyEmail(${lead.id})" 
+                                        ${!lead.email ? 'disabled' : ''}>
+                                    Verify
+                                </button>
+                            </div>
+                            <div class="email-status ${lead.emailVerified ? 'verified' : ''}">
+                                ${lead.emailVerified ? '✓ Verified' : ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td>${lead.address}</td>
+                    <td>
+                        <select class="priority-select" onchange="updatePriority(${lead.id}, this.value)">
+                            <option value="high" ${lead.priority === 'high' ? 'selected' : ''}>High Priority</option>
+                            <option value="medium" ${lead.priority === 'medium' ? 'selected' : ''}>Medium Priority</option>
+                            <option value="low" ${lead.priority === 'low' ? 'selected' : ''}>Low Priority</option>
+                        </select>
+                    </td>
+                    <td>
+                        <span class="call-status status-${lead.status}">
+                            ${formatStatus(lead.status)}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="contact-history">
+                            <div class="last-contact-info">
+                                <span class="label">Last Contact:</span>
+                                <span class="date">${formatDateTime(lead.lastContactDate) || 'Not contacted'}</span>
+                            </div>
+                            <div class="next-contact-info">
+                                <span class="label">Next Follow-up:</span>
+                                <input type="datetime-local" 
+                                       class="date-input" 
+                                       value="${lead.nextFollowUp || ''}"
+                                       onchange="updateContact(${lead.id}, 'nextFollowUp', this.value)">
+                            </div>
+                            <div class="contact-count">
+                                <span class="label">Contact Attempts:</span>
+                                <span class="count">${lead.contactAttempts || 0}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-button call-button" onclick="initiateCall('${lead.phoneNumber}', ${lead.id})">
+                                Call
+                            </button>
+                            <button class="action-button notes-button" onclick="openNotes(${lead.id})">
+                                Notes
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Update priority function
+        function updatePriority(leadId, priority) {
+            const lead = demoLeads.find(l => l.id === leadId);
+            if (lead) {
+                lead.priority = priority;
+                // In a real app, you would save this to your backend
+                console.log(`Updated priority for ${lead.companyName} to ${priority}`);
+            }
+        }
+
+        // Enhanced notes modal
+        function openNotes(leadId) {
+            currentLeadId = leadId;
+            const lead = demoLeads.find(l => l.id === leadId);
+            const modal = document.getElementById('notesModal');
+            
+            // Update modal content
+            document.getElementById('noteCompanyName').textContent = lead.companyName;
+            document.querySelector('.notes-textarea').value = lead.notes || '';
+            document.getElementById('leadStatus').value = lead.status || 'pending';
+            
+            modal.style.display = 'block';
+        }
+
+        // Save notes with timestamp
+        function saveNotes() {
+            const notes = document.querySelector('.notes-textarea').value;
+            const status = document.getElementById('leadStatus').value;
+            const lead = demoLeads.find(l => l.id === currentLeadId);
+            
+            if (lead) {
+                lead.notes = notes;
+                lead.status = status;
+                lead.lastUpdated = new Date().toISOString();
+                // In a real app, you would save this to your backend
+                console.log(`Updated notes and status for ${lead.companyName}`);
+                
+                // Update the table to reflect changes
+                renderLeadsTable();
+            }
+            
+            // Close the modal after saving
+            closeNotesModal();
+        }
+
+        // Update call status
+        function updateCallStatus(leadId) {
+            const lead = demoLeads.find(l => l.id === leadId);
+            if (lead) {
+                lead.status = 'contacted';
+                lead.lastContactDate = new Date().toISOString().split('T')[0];
+                lead.lastUpdated = new Date().toISOString();
+                renderLeadsTable();
+            }
+        }
+
+        // Add function to update lead status
+        function updateLeadStatus(leadId, status) {
+            const lead = demoLeads.find(l => l.id === leadId);
+            if (lead) {
+                lead.status = status;
+                lead.lastContactDate = new Date().toISOString().split('T')[0];
+                lead.lastUpdated = new Date().toISOString();
+                renderLeadsTable();
+            }
+        }
+
+        // Initialize demo data
+        document.addEventListener('DOMContentLoaded', () => {
+            renderLeadsTable();
+        });
+
+        // Add helper function to format status
+        function formatStatus(status) {
+            return status.split('-')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        }
+
+        function updateContact(leadId, field, value) {
+            const lead = demoLeads.find(l => l.id === leadId);
+            if (lead) {
+                lead[field] = value;
+                if (field === 'nextFollowUp') {
+                    lead.lastUpdated = new Date().toISOString();
+                }
+                // In a real app, you would save this to your backend
+                console.log(`Updated ${field} for ${lead.companyName} to ${value}`);
+            }
+        }
+
+        // Update the notes modal functions
+        function closeNotesModal() {
+            const modal = document.getElementById('notesModal');
+            modal.style.display = 'none';
+            currentLeadId = null;
+        }
+
+        // Add click handler for modal overlay to close on outside click
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('notesModal');
+            
+            // Close modal when clicking outside
+            window.onclick = function(event) {
+                if (event.target === modal) {
+                    closeNotesModal();
+                }
+            }
+
+            // Add escape key handler
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closeNotesModal();
+                }
+            });
+        });
+
+        // Add these functions for filtering and sorting
+        function filterLeads() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const priorityFilter = document.getElementById('priorityFilter').value;
+            const dateFrom = document.getElementById('dateFromFilter').value;
+            const dateTo = document.getElementById('dateToFilter').value;
+
+            const filteredLeads = demoLeads.filter(lead => {
+                const matchesSearch = 
+                    lead.companyName.toLowerCase().includes(searchTerm) ||
+                    lead.address.toLowerCase().includes(searchTerm) ||
+                    lead.pointOfContact.toLowerCase().includes(searchTerm) ||
+                    lead.phoneNumber.includes(searchTerm);
+
+                const matchesStatus = statusFilter === 'all' || lead.status === statusFilter;
+                const matchesPriority = priorityFilter === 'all' || lead.priority === priorityFilter;
+                
+                const matchesDate = (!dateFrom || lead.lastContactDate >= dateFrom) && 
+                                  (!dateTo || lead.lastContactDate <= dateTo);
+
+                return matchesSearch && matchesStatus && matchesPriority && matchesDate;
+            });
+
+            renderLeadsTable(filteredLeads);
+        }
+
+        // Modified render function to show activity indicators
+        function renderLeadsTable(leadsToRender = demoLeads) {
+            const tbody = document.getElementById('leadsTableBody');
+            tbody.innerHTML = leadsToRender.map(lead => `
+                <tr>
+                    <td>
+                        <div class="company-info">
+                            <strong>${lead.companyName}</strong>
+                            <div class="activity-indicator">
+                                ${lead.notes ? '<span class="has-notes" title="Has notes"></span>' : ''}
+                                ${lead.lastUpdated ? `<span class="last-activity">Updated: ${formatDate(lead.lastUpdated)}</span>` : ''}
+                            </div>
+                            <div class="contact-info">
+                                <input type="text" 
+                                       class="contact-input" 
+                                       placeholder="Point of Contact"
+                                       value="${lead.pointOfContact || ''}"
+                                       onchange="updateContact(${lead.id}, 'pointOfContact', this.value)">
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="contact-details">
+                            <a href="tel:${lead.phoneNumber}" class="phone-link" onclick="updateCallStatus(${lead.id})">
+                                ${lead.phoneNumber}
+                                <span class="call-icon">📞</span>
+                            </a>
+                            <div class="email-input-container">
+                                <input type="email" 
+                                       class="contact-input email-input" 
+                                       placeholder="Enter prospect email"
+                                       value="${lead.email || ''}"
+                                       onchange="updateContact(${lead.id}, 'email', this.value)">
+                                <button class="verify-email-btn" onclick="verifyEmail(${lead.id})" 
+                                        ${!lead.email ? 'disabled' : ''}>
+                                    Verify
+                                </button>
+                            </div>
+                            <div class="email-status ${lead.emailVerified ? 'verified' : ''}">
+                                ${lead.emailVerified ? '✓ Verified' : ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td>${lead.address}</td>
+                    <td>
+                        <select class="priority-select" onchange="updatePriority(${lead.id}, this.value)">
+                            <option value="high" ${lead.priority === 'high' ? 'selected' : ''}>High Priority</option>
+                            <option value="medium" ${lead.priority === 'medium' ? 'selected' : ''}>Medium Priority</option>
+                            <option value="low" ${lead.priority === 'low' ? 'selected' : ''}>Low Priority</option>
+                        </select>
+                    </td>
+                    <td>
+                        <span class="call-status status-${lead.status}">
+                            ${formatStatus(lead.status)}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="contact-history">
+                            <div class="last-contact-info">
+                                <span class="label">Last Contact:</span>
+                                <span class="date">${formatDateTime(lead.lastContactDate) || 'Not contacted'}</span>
+                            </div>
+                            <div class="next-contact-info">
+                                <span class="label">Next Follow-up:</span>
+                                <input type="datetime-local" 
+                                       class="date-input" 
+                                       value="${lead.nextFollowUp || ''}"
+                                       onchange="updateContact(${lead.id}, 'nextFollowUp', this.value)">
+                            </div>
+                            <div class="contact-count">
+                                <span class="label">Contact Attempts:</span>
+                                <span class="count">${lead.contactAttempts || 0}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-button call-button" onclick="initiateCall('${lead.phoneNumber}', ${lead.id})">
+                                Call
+                            </button>
+                            <button class="action-button notes-button" onclick="openNotes(${lead.id})">
+                                Notes
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Helper function to format dates
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        // Add sorting functionality
+        let currentSort = { field: null, direction: 'asc' };
+
+        function sortLeads(field) {
+            const direction = field === currentSort.field && currentSort.direction === 'asc' ? 'desc' : 'asc';
+            currentSort = { field, direction };
+
+            const sortedLeads = [...demoLeads].sort((a, b) => {
+                let comparison = 0;
+                if (a[field] < b[field]) comparison = -1;
+                if (a[field] > b[field]) comparison = 1;
+                return direction === 'asc' ? comparison : -comparison;
+            });
+
+            renderLeadsTable(sortedLeads);
+        }
+
+        // Initialize filters and sorting
+        document.addEventListener('DOMContentLoaded', () => {
+            renderLeadsTable();
+            
+            // Add event listeners for instant search
+            document.getElementById('searchInput').addEventListener('input', debounce(filterLeads, 300));
+        });
+
+        // Debounce helper function
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function verifyEmail(leadId) {
+            const lead = demoLeads.find(l => l.id === leadId);
+            if (!lead || !lead.email) return;
+
+            // Here you would typically make an API call to verify the email
+            // For demo purposes, we'll just simulate verification
+            lead.emailVerified = true;
+            renderLeadsTable();
+        }
+
+        function updateContact(leadId, field, value) {
+            const lead = demoLeads.find(l => l.id === leadId);
+            if (lead) {
+                lead[field] = value;
+                lead.lastUpdated = new Date().toISOString();
+                
+                // Auto-save to localStorage
+                const reportData = {
+                    leads: demoLeads,
+                    timestamp: new Date().toISOString(),
+                    filters: {
+                        status: document.getElementById('statusFilter').value,
+                        priority: document.getElementById('priorityFilter').value,
+                        dateFrom: document.getElementById('dateFromFilter').value,
+                        dateTo: document.getElementById('dateToFilter').value
+                    },
+                    searchQuery: document.getElementById('searchInput').value
+                };
+                localStorage.setItem('currentReport', JSON.stringify(reportData));
+            }
+        }
+
+        function toggleAISupport() {
+            const modal = document.getElementById('aiSupportModal');
+            modal.classList.toggle('active');
+        }
+
+        async function sendAIQuestion() {
+            const input = document.getElementById('aiQuestion');
+            const question = input.value.trim();
+            if (!question) return;
+
+            // Add user message
+            addMessage(question, 'user');
+            input.value = '';
+
+            try {
+                const response = await fetch('/api/ai-support', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question })
+                });
+
+                const data = await response.json();
+                addMessage(data.response, 'assistant');
+            } catch (error) {
+                addMessage('I apologize, but I encountered an error. Please try again.', 'assistant');
+            }
+        }
+
+        function handleAIInput(event) {
+            if (event.key === 'Enter') {
+                sendAIQuestion();
+            }
+        }
+
+        function addMessage(text, type) {
+            const chat = document.getElementById('aiChat');
+            const message = document.createElement('div');
+            message.className = `ai-message ${type}`;
+            message.textContent = text;
+            chat.appendChild(message);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function manageCookies() {
+            window.location.href = '/?showCookies=true';
+        }
+
+        // Update the helper function to format date and time
+        function formatDateTime(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Update the initiateCall function to track contact attempts
+        function initiateCall(phoneNumber, leadId) {
+            const lead = demoLeads.find(l => l.id === leadId);
+            if (lead) {
+                lead.contactAttempts = (lead.contactAttempts || 0) + 1;
+                lead.lastContactDate = new Date().toISOString();
+                lead.contactHistory = lead.contactHistory || [];
+                lead.contactHistory.push({
+                    date: new Date().toISOString(),
+                    type: 'call',
+                    notes: 'Call initiated'
+                });
+                
+                window.location.href = `tel:${phoneNumber}`;
+                updateCallStatus(leadId);
+                renderLeadsTable();
+            }
+        }
+
+        function saveReport() {
+            // Check if user has proper access level
+            const userTier = localStorage.getItem('userTier');
+            if (!userTier || userTier === 'basic') {
+                showUpgradeModal();
+                return;
+            }
+
+            // Gather all lead data including user inputs
+            const updatedLeads = demoLeads.map(lead => {
+                const row = document.querySelector(`tr[data-lead-id="${lead.id}"]`);
+                if (row) {
+                    return {
+                        ...lead,
+                        pointOfContact: row.querySelector('[data-field="pointOfContact"]')?.value || lead.pointOfContact,
+                        contactEmail: row.querySelector('[data-field="contactEmail"]')?.value || lead.contactEmail,
+                        contactRole: row.querySelector('[data-field="contactRole"]')?.value || lead.contactRole,
+                        notes: lead.notes,
+                        status: lead.status,
+                        priority: row.querySelector('.priority-select')?.value || lead.priority,
+                        nextFollowUp: row.querySelector('.date-input')?.value || lead.nextFollowUp,
+                        lastUpdated: new Date().toISOString()
+                    };
+                }
+                return lead;
+            });
+
+            // Save current report state
+            const reportData = {
+                leads: updatedLeads,
+                timestamp: new Date().toISOString(),
+                filters: {
+                    status: document.getElementById('statusFilter').value,
+                    priority: document.getElementById('priorityFilter').value,
+                    dateFrom: document.getElementById('dateFromFilter').value,
+                    dateTo: document.getElementById('dateToFilter').value
+                },
+                searchQuery: document.getElementById('searchInput').value
+            };
+
+            // Save to localStorage
+            const savedReports = JSON.parse(localStorage.getItem('savedReports') || '[]');
+            savedReports.push(reportData);
+            localStorage.setItem('savedReports', JSON.stringify(savedReports));
+            localStorage.setItem('currentReport', JSON.stringify(reportData));
+
+            // Show success message
+            showNotification('Report saved successfully!');
+        }
+
+        function showUpgradeModal() {
+            document.getElementById('upgradeModal').classList.add('active');
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeUpgradeModal() {
+            document.getElementById('upgradeModal').classList.remove('active');
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        function upgradeToPro() {
+            // Implement payment processing for Pro tier
+            alert('Processing Pro tier upgrade...');
+            // After successful payment:
+            localStorage.setItem('userTier', 'pro');
+            closeUpgradeModal();
+        }
+
+        function upgradeToEnterprise() {
+            // Implement payment processing for Enterprise tier
+            alert('Processing Enterprise tier upgrade...');
+            // After successful payment:
+            localStorage.setItem('userTier', 'enterprise');
+            localStorage.setItem('aiAccessPaid', 'true');
+            closeUpgradeModal();
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('modalOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'modalOverlay') {
+                closeUpgradeModal();
+            }
+        });
+
+        function showAdminLogin() {
+            document.getElementById('adminModal').classList.add('active');
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function handleAdminInput(event) {
+            if (event.key === 'Enter') {
+                verifyAdmin();
+            }
+        }
+
+        function verifyAdmin() {
+            const password = document.getElementById('adminPassword').value;
+            if (password === '1234') {
+                localStorage.setItem('adminAccess', 'true');
+                localStorage.setItem('userTier', 'enterprise');
+                localStorage.setItem('aiAccessPaid', 'true');
+                closeAdminModal();
+                alert('Admin access granted. All features unlocked.');
+            } else {
+                alert('Invalid admin password');
+            }
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.remove('active');
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.getElementById('adminPassword').value = '';
+        }
+
+        // Add this to your existing modal overlay click handler
+        document.getElementById('modalOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'modalOverlay') {
+                closeAdminModal();
+            }
+        });
+
+        // Add function to load saved report data
+        function loadSavedReport() {
+            const currentReport = localStorage.getItem('currentReport');
+            if (currentReport) {
+                const reportData = JSON.parse(currentReport);
+                
+                // Restore leads data
+                demoLeads = reportData.leads;
+                
+                // Restore filters
+                if (reportData.filters) {
+                    document.getElementById('statusFilter').value = reportData.filters.status || 'all';
+                    document.getElementById('priorityFilter').value = reportData.filters.priority || 'all';
+                    document.getElementById('dateFromFilter').value = reportData.filters.dateFrom || '';
+                    document.getElementById('dateToFilter').value = reportData.filters.dateTo || '';
+                    document.getElementById('searchInput').value = reportData.searchQuery || '';
+                }
+                
+                // Render the table with restored data
+                renderLeadsTable();
+            }
+        }
+
+        // Add notification system
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Add this script to report.html
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Get the CSV filename from localStorage
+            const csvFileName = localStorage.getItem('csvFileName');
+            
+            if (csvFileName) {
+                try {
+                    // Fetch the CSV data
+                    const response = await fetch(`/download-csv?filename=${csvFileName}`);
+                    const csvData = await response.text();
+                    
+                    // Parse and display the data
+                    displayReportData(csvData);
+                } catch (error) {
+                    console.error('Error loading report data:', error);
+                }
+            }
+        });
+
+        function displayReportData(csvData) {
+            // Parse CSV data
+            const rows = csvData.split('\n');
+            const headers = rows[0].split(',');
+            const data = rows.slice(1);
+            
+            // Create table HTML
+            const tableHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            ${headers.map(header => `<th>${header}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(row => `
+                            <tr>
+                                ${row.split(',').map(cell => `<td>${cell}</td>`).join('')}
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            // Insert table into the report
+            document.getElementById('reportData').innerHTML = tableHTML;
+        }
+    </script>
+</body>
+</html> 
