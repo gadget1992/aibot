@@ -204,3 +204,43 @@
 
     <p id="responseMessage" class="message">Sending...</p>
 </div>
+
+<script>
+    document.getElementById("scrapeForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
+        
+        const businessType = document.getElementById("businessType").value;
+        const location = document.getElementById("location").value;
+        const responseMessage = document.getElementById("responseMessage");
+
+        responseMessage.style.display = "block";
+        responseMessage.textContent = "Sending...";
+
+        const webhookUrl = "https://hook.eu2.make.com/l6tcudjx6bsqdyy6adoyj5kosf9r8f4o";
+        const formData = {
+            businessType: businessType,
+            location: location
+        };
+
+        try {
+            const response = await fetch(webhookUrl, {
+                method: "POST", 
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                responseMessage.textContent = "Market report request sent successfully!";
+                responseMessage.style.color = "var(--neo-primary)";
+            } else {
+                responseMessage.textContent = "Error sending request. Please try again.";
+                responseMessage.style.color = "red";
+            }
+        } catch (error) {
+            responseMessage.textContent = "Network error. Please check your connection.";
+            responseMessage.style.color = "red";
+        }
+    });
+</script>
